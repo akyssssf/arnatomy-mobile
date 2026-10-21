@@ -22,6 +22,10 @@ class Config {
         : penuh;
   }
 
+  /// Berkas `.usdz` untuk AR Quick Look di iPhone; hanya tersedia untuk model bawaan (null untuk unggahan admin).
+  static String? modelAr(String jalur, {required bool bawaan}) =>
+      bawaan ? sumberWeb(jalur).replaceFirst(RegExp(r'\.glb$'), '.usdz') : null;
+
   /// Hanya untuk pengembangan: token awal agar tidak mengetik login saat uji tampilan. Diabaikan di build rilis.
   static const devAccess = String.fromEnvironment('DEV_ACCESS');
   static const devRefresh = String.fromEnvironment('DEV_REFRESH');

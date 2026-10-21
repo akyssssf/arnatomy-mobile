@@ -9,7 +9,7 @@ Aplikasi ini hanyalah **klien** dari backend ARnatomy (repo `arnatomy-backend`, 
 | --- | --- | --- |
 | Masuk / Daftar | Login email + kata sandi (siswa/guru), token JWT di penyimpanan aman perangkat, refresh otomatis | `/v1/auth/login`, `/register`, `/refresh`, `/me`, `/logout` |
 | Beranda | Progres tugas belajar, percobaan terbaru | `/v1/tugas/progres` |
-| Eksplorasi | Daftar organ, model 3D (putar/zoom) dan **AR** lewat Google Scene Viewer, fakta, label bagian tubuh (dasar dan lanjutan) | `/v1/organ`, `/organ/:id`, `/bagian/:id/konten` |
+| Eksplorasi | Daftar organ, model 3D (putar/zoom), **AR**: iPhone lewat Quick Look (berkas `.usdz`), Android lewat Google Scene Viewer; fakta, label bagian tubuh (dasar dan lanjutan) | `/v1/organ`, `/organ/:id`, `/bagian/:id/konten` |
 | Asisten | Tanya jawab berbasis buku (RAG) dengan sumber; pilihan jenjang SMP/SMA | `/v1/asisten/tanya` |
 | Tugas | Kuis dan simulasi urutan alur (dinilai server) | `/v1/tugas`, `/tugas/:id`, `/tugas/:id/percobaan` |
 | Profil | Data akun, riwayat belajar, keluar | `/v1/riwayat`, `/v1/auth/logout` |
@@ -18,26 +18,33 @@ Membuka bagian tubuh dicatat sebagai riwayat belajar (durasi dihitung server).
 
 ## Batasan yang diketahui
 
+- **Target utama: iPhone.** Android ikut dibangun dari kode yang sama (APK rilis berhasil dibuat) tetapi belum dicoba di perangkat.
+- **AR di iPhone** memakai Quick Look: tombol "Lihat di ruanganmu" membuka berkas `.usdz` di Safari, lalu pengguna memilih AR. Model berukuran nyata
+  (jantung ±12 cm, paru-paru ±26 cm); cubit untuk memperbesar. Label belum menempel pada model seperti di versi web.
+  Berkas `.usdz` dibuat dari model web lewat Blender (dikurangi ke 40% poligon agar ±7 MB) dan lolos `usdchecker`; belum dicoba di perangkat.
 - **Rakit organ 3D** (FR-18) hanya ada di versi web; di aplikasi hanya menampilkan keterangan.
-- **AR** memakai Google Scene Viewer (Android, butuh ARCore). Model ditaruh di ruangan, tetapi label belum menempel pada model seperti di versi web.
-  Di iOS, Quick Look membutuhkan berkas `.usdz` yang belum dibuat, jadi iOS baru menampilkan 3D.
-- **Login Google** belum ada di aplikasi (butuh Client ID Android). Akun dibuat lewat Daftar, atau akun yang sudah ada.
-- Model unggahan admin dipakai apa adanya; model bawaan memakai salinan Draco (`*-mobile.glb`), lihat `lib/config.dart`.
-- Belum diuji pada perangkat Android sungguhan dan iOS.
+- **Login Google** belum ada di aplikasi (butuh Client ID iOS). Akun dibuat lewat Daftar, atau akun yang sudah ada.
+- Model unggahan admin tampil di 3D tetapi belum punya `.usdz`, jadi tombol AR iPhone hanya untuk model bawaan.
+- Simulator iOS tidak mendukung AR maupun kamera; uji AR harus di iPhone sungguhan.
 
-## Menjalankan
+## Menjalankan di iPhone
 
-Prasyarat: Flutter 3.47+, JDK 17, Android SDK 36 (`flutter doctor` harus hijau untuk Android).
+Prasyarat: macOS, Xcode, Flutter 3.47+, CocoaPods (`brew install cocoapods`), iPhone dengan kabel.
 
-```bash
-flutter pub get
-flutter run                                   # memakai server produksi (lihat lib/config.dart)
-flutter run --dart-define=API_BASE=http://10.0.2.2:4000 --dart-define=WEB_BASE=http://10.0.2.2:3000   # backend lokal dari emulator Android
-flutter build apk --release                   # build/app/outputs/flutter-apk/app-release.apk
-```
+1. Di iPhone: **Pengaturan → Privasi & Keamanan → Mode Pengembang** aktif, sambungkan kabel, ketuk "Percayai".
+2. Di Xcode: **Settings → Accounts** tambahkan Apple ID.
+3. `open ios/Runner.xcworkspace`, pilih target **Runner → Signing & Capabilities**: centang *Automatically manage signing*, pilih **Team** (Personal Team),
+   dan ganti **Bundle Identifier** menjadi yang unik (mis. `id.ac.uns.<namamu>.arnatomy`).
+4. `flutter devices` harus menampilkan iPhone-mu, lalu:
+   ```bash
+   flutter run --release
+   ```
+5. Pertama kali: iPhone **Pengaturan → Umum → VPN & Manajemen Perangkat** → percayai profil pengembangmu.
 
-Alamat server dapat diganti saat build lewat `--dart-define=API_BASE=...` dan `WEB_BASE=...`.
-`WEB_BASE` adalah situs web ARnatomy yang menyajikan model 3D bawaan (`/models/*.glb`) dan gambar organ.
+Catatan: Apple ID gratis menandatangani aplikasi selama **7 hari**; setelah itu pasang ulang dengan langkah 4.
+
+Alamat server dapat diganti saat build: `--dart-define=API_BASE=...` dan `--dart-define=WEB_BASE=...` (`WEB_BASE` = situs web yang menyajikan model dan gambar).
+Android: `flutter build apk --release`.
 
 ## Pengujian
 
@@ -62,7 +69,7 @@ test/                    uji klien, layar login, dan integrasi backend
 ## Keamanan
 
 - Token JWT disimpan di Keystore Android / Keychain iOS (`flutter_secure_storage`), bukan di preferensi biasa.
-- Lalu lintas http polos hanya diizinkan ke `localhost` (server lokal penampil 3D); sisanya wajib HTTPS (`network_security_config.xml`).
+- Lalu lintas http polos hanya diizinkan ke `localhost` (server lokal penampil 3D); sisanya wajib HTTPS (`NSAllowsLocalNetworking` di iOS, `network_security_config.xml` di Android).
 - Opsi `DEV_ACCESS`/`DEV_REFRESH` hanya bekerja di mode debug dan diabaikan pada build rilis.
 
 Model 3D: HuBMAP Human Reference Atlas, CC BY 4.0 (lihat `ATTRIBUTION.md` di repo frontend).
