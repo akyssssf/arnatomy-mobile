@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:model_viewer_plus/model_viewer_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../api/api_client.dart';
-import '../config.dart';
+import '../model_organ.dart';
 import 'widgets.dart';
 
 class OrganDetailScreen extends StatelessWidget {
@@ -33,18 +33,9 @@ class _Isi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = organ['model'] as Json?;
-    final url = model == null
-        ? null
-        : Config.modelMobile(
-            model['url'] as String,
-            bawaan: model['sumber'] == 'bawaan',
-          );
-    final usdz = model == null
-        ? null
-        : Config.modelAr(
-            model['url'] as String,
-            bawaan: model['sumber'] == 'bawaan',
-          );
+    final pilihan = model == null ? null : modelOrgan(model);
+    final url = pilihan?.src;
+    final usdz = pilihan?.usdzAset;
     final ios = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     final fakta = ((organ['fakta'] as List?) ?? const []).cast<Json>();
     final bagian = ((organ['bagian'] as List?) ?? const []).cast<Json>();
@@ -57,10 +48,8 @@ class _Isi extends StatelessWidget {
               key: ValueKey(url),
               src: url,
               alt: 'Model 3D ${organ['nama_organ']}',
-              // iPhone: AR lewat tombol "Lihat di ruanganmu" (Quick Look membuka berkas .usdz di Safari);
-              // Android: tombol AR bawaan viewer (Google Scene Viewer, butuh ARCore).
-              ar: !ios,
-              arModes: const ['scene-viewer', 'webxr'],
+              // AR iPhone lewat tombol "Lihat di ruanganmu" (Quick Look milik iOS, berkas .usdz terbawa di aplikasi).
+              ar: false,
               autoRotate: true,
               cameraControls: true,
               backgroundColor: const Color(0xFFEDEAE0),
@@ -77,7 +66,7 @@ class _Isi extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                ios ? 'Geser untuk memutar, cubit untuk memperbesar.' : 'Geser untuk memutar, cubit untuk memperbesar. Ketuk ikon AR di pojok model untuk menaruhnya di ruanganmu (perlu perangkat yang mendukung ARCore).',
+                'Geser untuk memutar, cubit untuk memperbesar.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (ios && usdz != null) ...[
@@ -92,7 +81,7 @@ class _Isi extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Safari akan menampilkan modelnya. Ketuk gambar model, lalu pilih AR dan arahkan kamera ke lantai atau meja. Ukuran model sama seperti organ aslinya; cubit untuk memperbesar.',
+                  'Pilih AR di layar yang terbuka, lalu arahkan kamera ke lantai atau meja. Ukuran model sama seperti organ aslinya; cubit untuk memperbesar.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -151,14 +140,23 @@ class _Isi extends StatelessWidget {
   }
 }
 
-/// iPhone: berkas .usdz dibuka di Safari, yang menawarkan AR Quick Look (kamera dan ARKit dikelola iOS, tanpa izin tambahan di aplikasi).
-Future<void> _bukaAr(BuildContext context, String usdz) async {
-  final ok = await launchUrl(
-    Uri.parse(usdz),
-    mode: LaunchMode.inAppBrowserView,
-  );
-  if (!ok && context.mounted) {
-    tampilkanSnack(context, 'AR tidak dapat dibuka di perangkat ini.');
+const _kanalAr = MethodChannel('id.ac.uns.arnatomy/ar');
+
+/// iPhone: meminta AR Quick Look (kode Swift di ios/Runner/AppDelegate.swift) membuka berkas .usdz yang terbawa di aplikasi.
+Future<void> _bukaAr(BuildContext context, String usdzAset) async {
+  try {
+    await _kanalAr.invokeMethod<void>('quickLook', {'aset': usdzAset});
+  } on PlatformException catch (e) {
+    if (context.mounted) {
+      tampilkanSnack(
+        context,
+        e.message ?? 'AR tidak dapat dibuka di perangkat ini.',
+      );
+    }
+  } on MissingPluginException {
+    if (context.mounted) {
+      tampilkanSnack(context, 'AR hanya tersedia di iPhone.');
+    }
   }
 }
 

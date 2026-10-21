@@ -7,24 +7,11 @@ class Config {
     defaultValue: 'https://api-production-8e84.up.railway.app',
   );
 
-  /// Situs web ARnatomy: menyajikan model 3D bawaan (/models/*.glb) dan gambar organ.
+  /// Situs web ARnatomy: menyajikan gambar organ dan model unggahan admin. Model bawaan ikut terbawa di aplikasi.
   static const webBase = String.fromEnvironment(
     'WEB_BASE',
     defaultValue: 'https://web-production-0198b5.up.railway.app',
   );
-
-  /// Model bawaan situs dikompres Meshopt (tidak didukung Scene Viewer/WebView), jadi aplikasi memakai salinan Draco `*-mobile.glb`.
-  /// Model unggahan admin dipakai apa adanya.
-  static String modelMobile(String jalur, {required bool bawaan}) {
-    final penuh = sumberWeb(jalur);
-    return bawaan
-        ? penuh.replaceFirst(RegExp(r'\.glb$'), '-mobile.glb')
-        : penuh;
-  }
-
-  /// Berkas `.usdz` untuk AR Quick Look di iPhone; hanya tersedia untuk model bawaan (null untuk unggahan admin).
-  static String? modelAr(String jalur, {required bool bawaan}) =>
-      bawaan ? sumberWeb(jalur).replaceFirst(RegExp(r'\.glb$'), '.usdz') : null;
 
   /// Hanya untuk pengembangan: token awal agar tidak mengetik login saat uji tampilan. Diabaikan di build rilis.
   static const devAccess = String.fromEnvironment('DEV_ACCESS');
