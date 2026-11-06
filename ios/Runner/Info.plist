@@ -5,6 +5,8 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<!-- Viewer 3D menyajikan model lewat server lokal di perangkat (http://localhost); sisanya wajib HTTPS -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>ARnatomy menghubungi server pengembangan di jaringan lokal (Wi-Fi yang sama).</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

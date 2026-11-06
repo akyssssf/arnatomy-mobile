@@ -35,13 +35,21 @@ Prasyarat: macOS, Xcode, Flutter 3.47+, CocoaPods (`brew install cocoapods`), iP
 2. Di Xcode: **Settings → Accounts** tambahkan Apple ID.
 3. `open ios/Runner.xcworkspace`, pilih target **Runner → Signing & Capabilities**: centang *Automatically manage signing*, pilih **Team** (Personal Team),
    dan ganti **Bundle Identifier** menjadi yang unik (mis. `id.ac.uns.<namamu>.arnatomy`).
-4. `flutter devices` harus menampilkan iPhone-mu, lalu:
+4. `flutter devices` harus menampilkan iPhone-mu. Jalankan backend (lihat bawah), lalu:
    ```bash
-   flutter run --release
+   flutter run --release --dart-define=API_BASE=http://<IP-Mac>:4000
    ```
 5. Pertama kali: iPhone **Pengaturan → Umum → VPN & Manajemen Perangkat** → percayai profil pengembangmu.
 
 Catatan: Apple ID gratis menandatangani aplikasi selama **7 hari**; setelah itu pasang ulang dengan langkah 4.
+
+**Backend untuk iPhone.** Server produksi percobaan (Railway) sudah dimatikan, jadi jalankan backend di Mac yang sama Wi-Fi-nya dengan iPhone:
+```bash
+cd ../arnatomy-backend && npm ci && npm run dev      # http://localhost:4000, data dan akun demo siap (hanya mode dev)
+ipconfig getifaddr en0                               # IP Mac, mis. 10.111.10.9 -> API_BASE=http://10.111.10.9:4000
+```
+Akun demo: `siswa@arnatomy.id` / `siswa123`. Saat pertama dibuka, iOS meminta izin "Jaringan Lokal": pilih Izinkan.
+Gambar organ memakai `WEB_BASE` (situs web) dan bisa kosong tanpa server itu; model 3D dan AR tidak terpengaruh karena dibawa aplikasi.
 
 Alamat server dapat diganti saat build: `--dart-define=API_BASE=...` dan `--dart-define=WEB_BASE=...` (`WEB_BASE` = situs web yang menyajikan gambar organ).
 Android: `flutter build apk --release`.
