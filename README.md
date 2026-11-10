@@ -3,6 +3,13 @@
 Aplikasi mobile (Flutter) untuk ARnatomy: belajar anatomi jantung dan paru-paru dengan model 3D, AR, asisten AI, dan tugas belajar.
 Aplikasi ini hanyalah **klien** dari backend ARnatomy (repo `arnatomy-backend`, API `/v1`); semua data, skor, dan akun ada di server.
 
+## Tampilan
+
+Bahasa visual sama dengan web ARnatomy (palet biru `#1566F4` di atas latar abu `#E6E8EB`, kartu putih membulat, label mikro "/ ORGAN", judul bertitik biru,
+font Inter dan Inter Tight) dengan **Liquid Glass ala iOS 26**: bilah tab pil mengambang, panel kaca (blur + saturasi + tepi bersorot), dan tombol kaca di atas model 3D.
+Komponen kaca ada di `lib/ui/kaca.dart` (dibuat dari referensi Figma "iOS 26 Liquid Glass"), token tema di `lib/tema.dart`.
+Kaca dibuat dengan `BackdropFilter`, jadi memburamkan latar tetapi tidak membiaskannya seperti kaca asli iOS 26.
+
 ## Fitur
 
 | Layar | Isi | Endpoint backend |
@@ -43,7 +50,7 @@ Prasyarat: macOS, Xcode, Flutter 3.47+, CocoaPods (`brew install cocoapods`), iP
 
 Catatan: Apple ID gratis menandatangani aplikasi selama **7 hari**; setelah itu pasang ulang dengan langkah 4.
 
-**Backend untuk iPhone.** Server produksi percobaan (Railway) sudah dimatikan, jadi jalankan backend di Mac yang sama Wi-Fi-nya dengan iPhone:
+**Backend.** Alamat bawaan menunjuk ke server percobaan Railway (trial 30 hari, berakhir sekitar 10 Des 2026); setelah itu atau untuk uji lokal, jalankan backend di Mac yang sama Wi-Fi-nya dengan iPhone:
 ```bash
 cd ../arnatomy-backend && npm ci && npm run dev      # http://localhost:4000, data dan akun demo siap (hanya mode dev)
 ipconfig getifaddr en0                               # IP Mac, mis. 10.111.10.9 -> API_BASE=http://10.111.10.9:4000
@@ -67,6 +74,7 @@ flutter test test/backend_lokal_test.dart --dart-define=BACKEND_LOKAL=http://loc
 
 ```
 lib/
+  tema.dart              palet, tipografi, ThemeData
   config.dart            alamat server
   model_organ.dart       memilih model lokal (.glb dan .usdz) atau alamat untuk tiap organ
   api/api_client.dart    klien HTTP, token, refresh otomatis, galat berpesan Indonesia
@@ -81,4 +89,5 @@ test/                    uji klien, layar login, dan integrasi backend
 - Lalu lintas http polos hanya diizinkan ke `localhost` (server lokal penampil 3D); sisanya wajib HTTPS (`NSAllowsLocalNetworking` di iOS, `network_security_config.xml` di Android).
 - Opsi `DEV_ACCESS`/`DEV_REFRESH` hanya bekerja di mode debug dan diabaikan pada build rilis.
 
+Font Inter dan Inter Tight (SIL OFL 1.1): lihat `assets/fonts/LICENSE-Inter.txt`.
 Model 3D: HuBMAP Human Reference Atlas, CC BY 4.0 (lihat `ATTRIBUTION.md`).
