@@ -4,13 +4,13 @@ class Config {
   /// Backend ARnatomy (API /v1).
   static const apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'https://api-production-8e84.up.railway.app',
+    defaultValue: 'https://api-production-7a3b.up.railway.app',
   );
 
   /// Situs web ARnatomy: menyajikan gambar organ dan model unggahan admin. Model bawaan ikut terbawa di aplikasi.
   static const webBase = String.fromEnvironment(
     'WEB_BASE',
-    defaultValue: 'https://web-production-0198b5.up.railway.app',
+    defaultValue: 'https://web-production-eeb236.up.railway.app',
   );
 
   /// Hanya untuk pengembangan: token awal agar tidak mengetik login saat uji tampilan. Diabaikan di build rilis.

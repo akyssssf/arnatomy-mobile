@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
 import '../state/auth_model.dart';
+import '../tema.dart';
+import 'komponen.dart';
 import 'widgets.dart';
 
 class BerandaScreen extends StatelessWidget {
@@ -24,94 +26,123 @@ class BerandaScreen extends StatelessWidget {
         final persen = (p['persen_selesai'] as num?)?.toDouble() ?? 0;
         final terbaru = (p['percobaan_terbaru'] as List?) ?? const [];
         return ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, ruangBilahTab + 16),
           children: [
-            Text(
-              'Halo, $depan',
-              style: Theme.of(context).textTheme.headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.w800),
+            KepalaHalaman(
+              mikro: 'Beranda',
+              judul: depan.isEmpty ? 'Halo' : 'Halo, $depan',
+              keterangan: 'Lanjutkan belajar anatomi hari ini.',
             ),
-            const SizedBox(height: 4),
-            const Text('Lanjutkan belajar anatomi hari ini.'),
-            const SizedBox(height: 20),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Progres tugas belajar'),
-                    const SizedBox(height: 6),
-                    Text(
-                      '$selesai dari $total tugas selesai',
-                      style: Theme.of(context).textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700),
+            const SizedBox(height: 24),
+            KartuPutih(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Mikro('Tugas belajar'),
+                  const SizedBox(height: 8),
+                  JudulTitik('$selesai dari $total selesai', ukuran: 26),
+                  const SizedBox(height: 16),
+                  BilahProgres(nilai: persen / 100),
+                  const SizedBox(height: 12),
+                  Text(
+                    p['rata_skor_terbaik'] == null
+                        ? 'Belum ada tugas yang dikerjakan. Mulai dari simulasi lalu kuis.'
+                        : 'Rata-rata skor terbaikmu ${p['rata_skor_terbaik']}.',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.4,
+                      color: Warna.netral500,
                     ),
-                    const SizedBox(height: 12),
-                    LinearProgressIndicator(
-                      value: (persen / 100).clamp(0, 1),
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(8),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Warna.abu,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      p['rata_skor_terbaik'] == null
-                          ? 'Belum ada skor.'
-                          : 'Rata-rata skor terbaik: ${p['rata_skor_terbaik']}',
-                    ),
-                  ],
-                ),
+                    onPressed: () => pindahTab(3),
+                    child: const Text('Semua tugas'),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
                     child: _Pintasan(
-                      ikon: Icons.view_in_ar,
+                      ikon: Icons.view_in_ar_rounded,
                       label: 'Jelajahi 3D dan AR',
+                      biru: true,
                       aksi: () => pindahTab(1),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: _Pintasan(
-                      ikon: Icons.chat_bubble,
-                      label: 'Tanya asisten',
+                      ikon: Icons.chat_bubble_rounded,
+                      label: 'Tanya asisten AI',
                       aksi: () => pindahTab(2),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            _Pintasan(
-              ikon: Icons.checklist,
-              label: 'Kerjakan tugas',
-              aksi: () => pindahTab(3),
-            ),
             if (terbaru.isNotEmpty) ...[
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
               Seksi(
                 judul: 'Percobaan terbaru',
-                anak: Card(
-                  child: Column(
-                    children: [
-                      for (final e in terbaru.take(4).cast<Json>())
-                        ListTile(
-                          title: Text(e['judul'] as String),
-                          subtitle: Text(
-                            '${e['benar']} dari ${e['total']} benar',
+                anak: Column(
+                  children: [
+                    for (final e in terbaru.take(4).cast<Json>())
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: KartuPutih(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
                           ),
-                          trailing: Text(
-                            '${e['skor']}',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      e['judul'] as String,
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${e['benar']} dari ${e['total']} benar',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Warna.netral500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Lencana(
+                                'Skor ${e['skor']}',
+                                tipe: (e['skor'] as int? ?? 0) >= 70
+                                    ? TipeLencana.hijau
+                                    : TipeLencana.netral,
+                              ),
+                            ],
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -127,31 +158,38 @@ class _Pintasan extends StatelessWidget {
     required this.ikon,
     required this.label,
     required this.aksi,
+    this.biru = false,
   });
   final IconData ikon;
   final String label;
   final VoidCallback aksi;
+  final bool biru;
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: aksi,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(ikon, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
+    final isi = biru ? Colors.white : Warna.teks;
+    return KartuPutih(
+      warna: biru ? Warna.biru : Colors.white,
+      onTap: aksi,
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: biru ? Colors.white.withValues(alpha: 0.18) : Warna.abu,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              ikon,
+              size: 22,
+              color: biru ? Colors.white : Warna.biru,
+            ),
           ),
-        ),
+          const SizedBox(height: 28),
+          Text(label, style: gayaTampilan(17, warna: isi, tinggi: 1.15)),
+        ],
       ),
     );
   }

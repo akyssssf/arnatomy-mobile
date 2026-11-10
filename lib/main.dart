@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'api/api_client.dart';
 import 'config.dart';
 import 'state/auth_model.dart';
+import 'tema.dart';
 import 'ui/home_shell.dart';
 import 'ui/login_screen.dart';
 
@@ -36,42 +37,6 @@ class ArnatomyApp extends StatelessWidget {
       ),
     );
   }
-}
-
-const warnaAksen = Color(0xFF0F6E6E);
-
-ThemeData tema() {
-  final skema = ColorScheme.fromSeed(
-    seedColor: warnaAksen,
-    surface: const Color(0xFFF6F4EF),
-  );
-  return ThemeData(
-    useMaterial3: true,
-    colorScheme: skema,
-    scaffoldBackgroundColor: const Color(0xFFF6F4EF),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Color(0xFFF6F4EF),
-      surfaceTintColor: Colors.transparent,
-    ),
-    cardTheme: CardThemeData(
-      color: Colors.white,
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: Color(0xFFD9D5CA)),
-      ),
-    ),
-    inputDecorationTheme: InputDecorationTheme(
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-    ),
-    navigationBarTheme: const NavigationBarThemeData(
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.transparent,
-    ),
-  );
 }
 
 class _Gerbang extends StatelessWidget {

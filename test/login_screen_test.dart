@@ -64,8 +64,14 @@ void main() {
     );
     await tester.tap(find.widgetWithText(FilledButton, 'Masuk'));
     await tester.pumpAndSettle();
-    expect(find.text('Halo, Budi'), findsOneWidget);
-    expect(find.text('1 dari 4 tugas selesai'), findsOneWidget);
+    expect(
+      find.textContaining('Halo, Budi', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('1 dari 4 selesai', findRichText: true),
+      findsOneWidget,
+    );
   });
 
   testWidgets('mode daftar menampilkan kolom nama, peran, dan sekolah', (

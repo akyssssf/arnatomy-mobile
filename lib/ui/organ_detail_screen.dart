@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
 import '../model_organ.dart';
+import '../tema.dart';
+import 'kaca.dart';
+import 'komponen.dart';
 import 'widgets.dart';
 
 class OrganDetailScreen extends StatelessWidget {
@@ -17,7 +20,6 @@ class OrganDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final api = context.read<ApiClient>();
     return Scaffold(
-      appBar: AppBar(title: Text(nama)),
       body: DataView<Json>(
         muat: () => api.organDetail(id),
         bangun: (context, o) => _Isi(organ: o),
@@ -39,96 +41,173 @@ class _Isi extends StatelessWidget {
     final ios = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     final fakta = ((organ['fakta'] as List?) ?? const []).cast<Json>();
     final bagian = ((organ['bagian'] as List?) ?? const []).cast<Json>();
+    final atas = MediaQuery.paddingOf(context).top;
     return ListView(
+      padding: EdgeInsets.zero,
       children: [
-        if (url != null)
-          SizedBox(
-            height: 340,
-            child: ModelViewer(
-              key: ValueKey(url),
-              src: url,
-              alt: 'Model 3D ${organ['nama_organ']}',
-              // AR iPhone lewat tombol "Lihat di ruanganmu" (Quick Look milik iOS, berkas .usdz terbawa di aplikasi).
-              ar: false,
-              autoRotate: true,
-              cameraControls: true,
-              backgroundColor: const Color(0xFFEDEAE0),
+        Stack(
+          children: [
+            Container(
+              height: 400 + atas,
+              margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              padding: EdgeInsets.only(top: atas),
+              clipBehavior: Clip.antiAlias,
+              decoration: const BoxDecoration(
+                color: Warna.abu,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(36),
+                ),
+              ),
+              child: url != null
+                  ? ModelViewer(
+                      key: ValueKey(url),
+                      src: url,
+                      alt: 'Model 3D ${organ['nama_organ']}',
+                      ar: false,
+                      autoRotate: true,
+                      cameraControls: true,
+                      backgroundColor: Warna.abu,
+                    )
+                  : const Center(child: Text('Model 3D belum tersedia.')),
             ),
-          )
-        else
-          const SizedBox(
-            height: 200,
-            child: Center(child: Text('Model 3D belum tersedia.')),
-          ),
+            Positioned(
+              top: atas + 10,
+              left: 22,
+              child: KacaTombolBulat(
+                ikon: Icons.arrow_back_ios_new_rounded,
+                label: 'Kembali',
+                onTap: () => Navigator.of(context).maybePop(),
+              ),
+            ),
+            if (ios && usdz != null)
+              Positioned(
+                bottom: 18,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: _TombolAr(onTap: () => _bukaAr(context, usdz)),
+                ),
+              ),
+          ],
+        ),
         Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, ruangBilahTab),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              Lencana(organ['sistem_organ'] as String),
+              const SizedBox(height: 12),
+              JudulTitik(organ['nama_organ'] as String, ukuran: 38),
+              const SizedBox(height: 8),
+              const Text(
                 'Geser untuk memutar, cubit untuk memperbesar.',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: TextStyle(fontSize: 13, color: Warna.netral400),
               ),
-              if (ios && usdz != null) ...[
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => _bukaAr(context, usdz),
-                  icon: const Icon(Icons.view_in_ar),
-                  label: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('Lihat di ruanganmu (AR)'),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Pilih AR di layar yang terbuka, lalu arahkan kamera ke lantai atau meja. Ukuran model sama seperti organ aslinya; cubit untuk memperbesar.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              const SizedBox(height: 20),
               if (organ['deskripsi'] != null) ...[
-                Text(organ['deskripsi'] as String),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
+                Text(
+                  organ['deskripsi'] as String,
+                  style: const TextStyle(fontSize: 16, height: 1.5),
+                ),
               ],
-              if (fakta.isNotEmpty)
+              if (fakta.isNotEmpty) ...[
+                const SizedBox(height: 28),
                 Seksi(
                   judul: 'Fakta singkat',
-                  anak: Card(
+                  anak: KartuPutih(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
                     child: Column(
                       children: [
-                        for (final f in fakta)
-                          ListTile(
-                            dense: true,
-                            title: Text(f['label'] as String),
-                            trailing: Text(f['nilai'] as String),
+                        for (final (i, f) in fakta.indexed) ...[
+                          if (i > 0) const Divider(indent: 18, endIndent: 18),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 12,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 4,
+                                  child: Text(
+                                    f['label'] as String,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Warna.netral500,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 6,
+                                  child: Text(
+                                    f['nilai'] as String,
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
+                        ],
                       ],
                     ),
                   ),
                 ),
+              ],
               if (bagian.isNotEmpty) ...[
-                const SizedBox(height: 20),
+                const SizedBox(height: 28),
                 Seksi(
-                  judul: 'Bagian tubuh (ketuk untuk belajar)',
-                  anak: Card(
-                    child: Column(
-                      children: [
-                        for (final b in bagian)
-                          ListTile(
-                            title: Text(_namaBagian(b)),
-                            trailing: const Icon(Icons.chevron_right),
+                  judul: 'Bagian tubuh, ketuk untuk belajar',
+                  anak: Column(
+                    children: [
+                      for (final b in bagian)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: KartuPutih(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 16,
+                            ),
                             onTap: () => showModalBottomSheet<void>(
                               context: context,
                               isScrollControlled: true,
                               showDragHandle: true,
+                              backgroundColor: Warna.latar,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(32),
+                                ),
+                              ),
                               builder: (_) => BagianSheet(
                                 idBagian: b['id_bagian'] as int,
                                 nama: _namaBagian(b),
                               ),
                             ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _namaBagian(b),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Warna.netral400,
+                                ),
+                              ],
+                            ),
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
               ],
@@ -136,6 +215,38 @@ class _Isi extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Tombol kaca mengambang di atas model: membuka AR Quick Look (iPhone).
+class _TombolAr extends StatelessWidget {
+  const _TombolAr({required this.onTap});
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Lihat di ruanganmu dengan AR',
+      child: GestureDetector(
+        onTap: onTap,
+        child: KacaPanel(
+          radius: 999,
+          sigma: 12,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.view_in_ar_rounded, size: 20, color: Warna.biru),
+              SizedBox(width: 10),
+              Text(
+                'Lihat di ruanganmu (AR)',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -206,7 +317,7 @@ class _BagianSheetState extends State<BagianSheet> {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.6,
+      initialChildSize: 0.62,
       maxChildSize: 0.92,
       builder: (context, scroll) => FutureBuilder<List<dynamic>>(
         future: _konten,
@@ -220,41 +331,87 @@ class _BagianSheetState extends State<BagianSheet> {
           final dimmed = daftar.where((k) => k['jenis_konten'] == 'dimmed');
           return ListView(
             controller: scroll,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
             children: [
-              Text(
-                widget.nama,
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 12),
+              const Mikro('Bagian tubuh'),
+              const SizedBox(height: 8),
+              JudulTitik(widget.nama, ukuran: 28),
+              const SizedBox(height: 16),
               if (daftar.isEmpty)
-                const Text('Materi untuk bagian ini belum diterbitkan.'),
-              for (final k in dasar) ...[
-                Text(
-                  k['judul_tampil'] as String,
-                  style: Theme.of(context).textTheme.titleMedium,
+                const Text(
+                  'Materi untuk bagian ini belum diterbitkan.',
+                  style: TextStyle(color: Warna.netral500),
                 ),
-                const SizedBox(height: 6),
-                Text(k['deskripsi'] as String),
-                const SizedBox(height: 16),
+              for (final k in dasar) ...[
+                KartuPutih(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        k['judul_tampil'] as String,
+                        style: gayaTampilan(19),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        k['deskripsi'] as String,
+                        style: const TextStyle(fontSize: 15, height: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
               ],
               if (dimmed.isNotEmpty)
-                ExpansionTile(
-                  title: const Text('Pelajari lebih lanjut'),
-                  onExpansionChanged: (buka) {
-                    if (buka && !_dimmedDicatat) {
-                      _dimmedDicatat = true;
-                      _catat('dimmed');
-                    }
-                  },
-                  children: [
-                    for (final k in dimmed)
-                      ListTile(
-                        title: Text(k['judul_tampil'] as String),
-                        subtitle: Text(k['deskripsi'] as String),
+                Material(
+                  color: Warna.netral900,
+                  borderRadius: BorderRadius.circular(20),
+                  clipBehavior: Clip.antiAlias,
+                  child: Theme(
+                    data: Theme.of(context)
+                        .copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      iconColor: Colors.white,
+                      collapsedIconColor: Colors.white70,
+                      shape: const Border(),
+                      collapsedShape: const Border(),
+                      title: const Text(
+                        'Pelajari lebih lanjut',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                  ],
+                      onExpansionChanged: (buka) {
+                        if (buka && !_dimmedDicatat) {
+                          _dimmedDicatat = true;
+                          _catat('dimmed');
+                        }
+                      },
+                      childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final k in dimmed) ...[
+                          Text(
+                            k['judul_tampil'] as String,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            k['deskripsi'] as String,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              height: 1.5,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
             ],
           );

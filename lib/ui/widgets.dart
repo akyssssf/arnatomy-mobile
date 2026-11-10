@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../api/api_client.dart';
+import '../tema.dart';
+import 'komponen.dart';
 
 /// Memuat data async dengan keadaan memuat, galat (dengan tombol coba lagi), dan tarik-untuk-segarkan.
 class DataView<T> extends StatefulWidget {
@@ -35,6 +37,7 @@ class _DataViewState<T> extends State<DataView<T>> {
         }
         return RefreshIndicator(
           onRefresh: _ulang,
+          color: Warna.biru,
           child: widget.bangun(context, snap.data as T),
         );
       },
@@ -53,19 +56,32 @@ class GalatView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_outlined, size: 40),
-            const SizedBox(height: 12),
-            Text(pesan, textAlign: TextAlign.center),
-            if (ulang != null) ...[
-              const SizedBox(height: 12),
-              FilledButton.tonal(
-                onPressed: ulang,
-                child: const Text('Coba lagi'),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
+              child: const Icon(
+                Icons.cloud_off_outlined,
+                size: 26,
+                color: Warna.netral500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              pesan,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 15, height: 1.4),
+            ),
+            if (ulang != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(onPressed: ulang, child: const Text('Coba lagi')),
             ],
           ],
         ),
@@ -80,7 +96,7 @@ void tampilkanSnack(BuildContext context, String pesan) {
     ..showSnackBar(SnackBar(content: Text(pesan)));
 }
 
-/// Kotak berjudul kecil di atas isi.
+/// Bagian berjudul: label mikro di atas isi.
 class Seksi extends StatelessWidget {
   const Seksi({super.key, required this.judul, required this.anak});
   final String judul;
@@ -91,12 +107,8 @@ class Seksi extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            judul,
-            style: Theme.of(context).textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
-          ),
+          padding: const EdgeInsets.only(bottom: 10, left: 2),
+          child: Mikro(judul),
         ),
         anak,
       ],

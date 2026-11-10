@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
+import '../tema.dart';
+import 'kaca.dart';
+import 'komponen.dart';
 
 class _Pesan {
   _Pesan.user(this.teks) : dariUser = true, sumber = const [], cadangan = false;
@@ -79,47 +82,46 @@ class _AsistenScreenState extends State<AsistenScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Asisten AI',
-                  style: t.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+          child: KepalaHalaman(
+            mikro: 'Asisten',
+            judul: 'Tanya AI',
+            aksi: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'SMP', label: Text('SMP')),
+                ButtonSegment(value: 'SMA', label: Text('SMA')),
+              ],
+              selected: {_jenjang},
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                visualDensity: VisualDensity.compact,
               ),
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'SMP', label: Text('SMP')),
-                  ButtonSegment(value: 'SMA', label: Text('SMA')),
-                ],
-                selected: {_jenjang},
-                showSelectedIcon: false,
-                onSelectionChanged: (s) => setState(() => _jenjang = s.first),
-              ),
-            ],
+              onSelectionChanged: (s) => setState(() => _jenjang = s.first),
+            ),
           ),
         ),
         Expanded(
           child: _pesan.isEmpty
               ? const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                    padding: EdgeInsets.symmetric(horizontal: 36),
                     child: Text(
                       'Tanyakan apa saja tentang jantung, paru-paru, peredaran darah, dan pernapasan. Jawaban disusun dari buku dan disertai sumbernya.',
                       textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.5,
+                        color: Warna.netral500,
+                      ),
                     ),
                   ),
                 )
               : ListView.builder(
                   controller: _gulir,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                   itemCount: _pesan.length + (_sibuk ? 1 : 0),
                   itemBuilder: (context, i) {
                     if (i == _pesan.length) {
@@ -139,10 +141,12 @@ class _AsistenScreenState extends State<AsistenScreen> {
                   },
                 ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 6, 14, ruangBilahTab - 6),
+          child: KacaPanel(
+            radius: 999,
+            sigma: 12,
+            padding: const EdgeInsets.fromLTRB(20, 4, 6, 4),
             child: Row(
               children: [
                 Expanded(
@@ -154,14 +158,21 @@ class _AsistenScreenState extends State<AsistenScreen> {
                     decoration: const InputDecoration(
                       hintText: 'Tulis pertanyaan…',
                       counterText: '',
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
                 IconButton.filled(
                   tooltip: 'Kirim',
+                  style: IconButton.styleFrom(
+                    backgroundColor: Warna.biru,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: _sibuk ? null : _kirim,
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(Icons.arrow_upward_rounded),
                 ),
               ],
             ),
@@ -172,65 +183,100 @@ class _AsistenScreenState extends State<AsistenScreen> {
   }
 }
 
+/// Gelembung percakapan seperti `bubble` di web: pengguna biru, AI abu.
 class _Gelembung extends StatelessWidget {
   const _Gelembung({required this.pesan});
   final _Pesan pesan;
   @override
   Widget build(BuildContext context) {
-    final skema = Theme.of(context).colorScheme;
     final user = pesan.dariUser;
     return Align(
       alignment: user ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.82,
+          maxWidth: MediaQuery.sizeOf(context).width * 0.85,
         ),
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: user ? skema.primary : Colors.white,
-          border: user ? null : Border.all(color: const Color(0xFFD9D5CA)),
-          borderRadius: BorderRadius.circular(16),
+          color: user ? Warna.biru : Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(20),
+            topRight: const Radius.circular(20),
+            bottomLeft: Radius.circular(user ? 20 : 6),
+            bottomRight: Radius.circular(user ? 6 : 20),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SelectableText(
               pesan.teks,
-              style: TextStyle(color: user ? Colors.white : null),
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.45,
+                color: user ? Colors.white : Warna.teks,
+              ),
             ),
             if (pesan.cadangan)
               const Padding(
-                padding: EdgeInsets.only(top: 6),
-                child: Text(
-                  'Jawaban dari basis pengetahuan lokal (penjelasan AI sedang tidak tersedia).',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                ),
+                padding: EdgeInsets.only(top: 8),
+                child: Lencana('Jawaban lokal'),
               ),
             if (pesan.sumber.isNotEmpty)
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                dense: true,
-                title: Text(
-                  'Sumber (${pesan.sumber.length})',
-                  style: const TextStyle(fontSize: 13),
-                ),
-                children: [
-                  for (final s in pesan.sumber)
-                    ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        '${s['buku']}, hlm. ${s['halaman']}',
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                      subtitle: Text(
-                        '${s['cuplikan']}',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: EdgeInsets.zero,
+                  dense: true,
+                  shape: const Border(),
+                  collapsedShape: const Border(),
+                  title: Text(
+                    'Sumber (${pesan.sumber.length})',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Warna.biru,
                     ),
-                ],
+                  ),
+                  children: [
+                    for (final s in pesan.sumber)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Warna.abu,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${s['buku']}, hlm. ${s['halaman']}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${s['cuplikan']}',
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                height: 1.4,
+                                color: Warna.netral500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
           ],
         ),

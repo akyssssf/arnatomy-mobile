@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../api/api_client.dart';
 import '../state/auth_model.dart';
+import '../tema.dart';
+import 'kaca.dart';
+import 'komponen.dart';
 import 'widgets.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -58,134 +61,157 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Form(
-                key: _form,
+    return LatarAurora(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'ARnatomy',
-                      style: t.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+                    const Mikro('Anatomi dalam 3D dan AR'),
+                    const SizedBox(height: 10),
+                    const JudulTitik('ARnatomy', ukuran: 46),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Belajar anatomi jantung dan paru-paru dengan model 3D, AR, dan asisten AI.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.45,
+                        color: Warna.netral500,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Belajar anatomi jantung dan paru-paru dengan model 3D dan AR.',
-                      style: t.textTheme.bodyLarge?.copyWith(
-                        color: Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    Text(
-                      _daftar ? 'Buat akun' : 'Masuk',
-                      style: t.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    if (_daftar) ...[
-                      TextFormField(
-                        controller: _nama,
-                        decoration: const InputDecoration(
-                          labelText: 'Nama lengkap',
-                        ),
-                        validator: (v) => (v ?? '').trim().length < 3
-                            ? 'Nama minimal 3 karakter.'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(labelText: 'Email'),
-                      validator: (v) => _wajib(v, 'Email'),
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _sandi,
-                      obscureText: !_lihat,
-                      decoration: InputDecoration(
-                        labelText: 'Kata sandi',
-                        helperText: _daftar
-                            ? 'Minimal 8 karakter, memuat huruf dan angka.'
-                            : null,
-                        suffixIcon: IconButton(
-                          tooltip: _lihat
-                              ? 'Sembunyikan kata sandi'
-                              : 'Tampilkan kata sandi',
-                          icon: Icon(
-                            _lihat
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                          ),
-                          onPressed: () => setState(() => _lihat = !_lihat),
-                        ),
-                      ),
-                      validator: (v) {
-                        if (_wajib(v, 'Kata sandi') case final g?) return g;
-                        if (_daftar &&
-                            !RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$')
-                                .hasMatch(v!)) {
-                          return 'Minimal 8 karakter, memuat huruf dan angka.';
-                        }
-                        return null;
-                      },
-                    ),
-                    if (_daftar) ...[
-                      const SizedBox(height: 12),
-                      SegmentedButton<String>(
-                        segments: const [
-                          ButtonSegment(value: 'siswa', label: Text('Siswa')),
-                          ButtonSegment(value: 'guru', label: Text('Guru')),
-                        ],
-                        selected: {_peran},
-                        onSelectionChanged: (s) =>
-                            setState(() => _peran = s.first),
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _sekolah,
-                        decoration: const InputDecoration(
-                          labelText: 'Asal sekolah',
-                        ),
-                        validator: (v) => (v ?? '').trim().length < 3
-                            ? 'Nama sekolah minimal 3 karakter.'
-                            : null,
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    FilledButton(
-                      onPressed: _sibuk ? null : _kirim,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: _sibuk
-                            ? const SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                    const SizedBox(height: 26),
+                    KacaPanel(
+                      radius: 32,
+                      padding: const EdgeInsets.all(22),
+                      child: Form(
+                        key: _form,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              _daftar ? 'Buat akun' : 'Masuk',
+                              style: gayaTampilan(24),
+                            ),
+                            const SizedBox(height: 16),
+                            if (_daftar) ...[
+                              TextFormField(
+                                controller: _nama,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nama lengkap',
                                 ),
-                              )
-                            : Text(_daftar ? 'Daftar' : 'Masuk'),
+                                validator: (v) => (v ?? '').trim().length < 3
+                                    ? 'Nama minimal 3 karakter.'
+                                    : null,
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                            TextFormField(
+                              controller: _email,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [AutofillHints.email],
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                              ),
+                              validator: (v) => _wajib(v, 'Email'),
+                            ),
+                            const SizedBox(height: 12),
+                            TextFormField(
+                              controller: _sandi,
+                              obscureText: !_lihat,
+                              decoration: InputDecoration(
+                                labelText: 'Kata sandi',
+                                helperText: _daftar
+                                    ? 'Minimal 8 karakter, memuat huruf dan angka.'
+                                    : null,
+                                suffixIcon: IconButton(
+                                  tooltip: _lihat
+                                      ? 'Sembunyikan kata sandi'
+                                      : 'Tampilkan kata sandi',
+                                  icon: Icon(
+                                    _lihat
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _lihat = !_lihat),
+                                ),
+                              ),
+                              validator: (v) {
+                                if (_wajib(v, 'Kata sandi') case final g?) {
+                                  return g;
+                                }
+                                if (_daftar &&
+                                    !RegExp(r'^(?=.*[A-Za-z])(?=.*\d).{8,}$')
+                                        .hasMatch(v!)) {
+                                  return 'Minimal 8 karakter, memuat huruf dan angka.';
+                                }
+                                return null;
+                              },
+                            ),
+                            if (_daftar) ...[
+                              const SizedBox(height: 14),
+                              SegmentedButton<String>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: 'siswa',
+                                    label: Text('Siswa'),
+                                  ),
+                                  ButtonSegment(
+                                    value: 'guru',
+                                    label: Text('Guru'),
+                                  ),
+                                ],
+                                selected: {_peran},
+                                showSelectedIcon: false,
+                                onSelectionChanged: (s) =>
+                                    setState(() => _peran = s.first),
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _sekolah,
+                                decoration: const InputDecoration(
+                                  labelText: 'Asal sekolah',
+                                ),
+                                validator: (v) => (v ?? '').trim().length < 3
+                                    ? 'Nama sekolah minimal 3 karakter.'
+                                    : null,
+                              ),
+                            ],
+                            const SizedBox(height: 20),
+                            FilledButton(
+                              onPressed: _sibuk ? null : _kirim,
+                              child: _sibuk
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Text(_daftar ? 'Daftar' : 'Masuk'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: _sibuk
-                          ? null
-                          : () => setState(() => _daftar = !_daftar),
-                      child: Text(
-                        _daftar
-                            ? 'Sudah punya akun? Masuk'
-                            : 'Belum punya akun? Daftar',
+                    const SizedBox(height: 10),
+                    Center(
+                      child: TextButton(
+                        onPressed: _sibuk
+                            ? null
+                            : () => setState(() => _daftar = !_daftar),
+                        child: Text(
+                          _daftar
+                              ? 'Sudah punya akun? Masuk'
+                              : 'Belum punya akun? Daftar',
+                        ),
                       ),
                     ),
                   ],
